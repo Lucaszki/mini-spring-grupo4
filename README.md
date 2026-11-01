@@ -1,6 +1,6 @@
 # Sistema de Gestão de Salas de Coworking
 
-Projeto desenvolvido para a disciplina de Engenharia de Software, focado na criação de uma API REST utilizando um framework educacional customizado ("Mini Spring") e rodando no Java 21.
+Projeto desenvolvido para a disciplina de Progrmação III, ministrada pelo professor **Alisson Ferreira da Silva**. O escopo foca na criação de uma API REST utilizando um framework educacional customizado ("Mini Spring") e rodando no Java 21.
 
 ## 👥 Integrantes - Grupo 4
 * Gabriel Cavalcante
