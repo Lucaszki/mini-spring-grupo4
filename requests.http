@@ -1,58 +1,58 @@
-@baseUrl = http://127.0.0.1:8080
+### Variáveis
+@baseUrl = http://localhost:8080
 
-### Informações
-GET {{baseUrl}}/
-
-### Saúde
-GET {{baseUrl}}/health
-
-### Criar curso
-POST {{baseUrl}}/cursos
+### 1. Criar Sala (Sucesso - 201)
+# @name criarSala
+POST {{baseUrl}}/salas
 Content-Type: application/json
 
-{"nome":"Java básico","cargaHoraria":40}
+{
+  "nome": "Sala Master",
+  "capacidadePessoas": 25
+}
 
-### Listar
-GET {{baseUrl}}/cursos
+###
 
-### Filtrar
-GET {{baseUrl}}/cursos?nome=java
+@salaId = {{criarSala.response.headers.Location}}
 
-### Consultar — ajuste o ID conforme o POST
-GET {{baseUrl}}/cursos/1
-
-### Atualizar
-PUT {{baseUrl}}/cursos/1
+### 2. Criar Sala (Erro 400 - Campos Inválidos)
+POST {{baseUrl}}/salas
 Content-Type: application/json
 
-{"nome":"Java avançado","cargaHoraria":80}
+{
+  "nome": "",
+  "capacidadePessoas": 0
+}
 
-### Validação estrutural: 400
-POST {{baseUrl}}/cursos
+### 3. Criar Sala (Erro 422 - Regra de Negócio excedida)
+POST {{baseUrl}}/salas
 Content-Type: application/json
 
-{"nome":" ","cargaHoraria":0}
+{
+  "nome": "Auditório Principal",
+  "capacidadePessoas": 150
+}
 
-### Regra de negócio: 422
-POST {{baseUrl}}/cursos
+### 4. Listar todas as Salas (200)
+GET {{baseUrl}}/salas
+
+### 5. Filtrar Sala por Nome (200)
+GET {{baseUrl}}/salas?nome=master
+
+### 6. Buscar Sala por ID (200)
+GET {{baseUrl}}{{salaId}}
+
+### 7. Atualizar Sala (Sucesso - 200)
+PUT {{baseUrl}}{{salaId}}
 Content-Type: application/json
 
-{"nome":"Java","cargaHoraria":2001}
+{
+  "nome": "Sala Master Reformada",
+  "capacidadePessoas": 30
+}
 
-### Formato inválido: 400
-POST {{baseUrl}}/cursos
-Content-Type: application/json
+### 8. Excluir Sala (204)
+DELETE {{baseUrl}}{{salaId}}
 
-{"nome":
-
-### Tipo de mídia inválido: 415
-POST {{baseUrl}}/cursos
-Content-Type: text/plain
-
-texto
-
-### Método não permitido: 405
-PATCH {{baseUrl}}/cursos/1
-
-### Excluir
-DELETE {{baseUrl}}/cursos/1
+### 9. Buscar Sala Inexistente (Erro 404)
+GET {{baseUrl}}/salas/id-invalido-123
