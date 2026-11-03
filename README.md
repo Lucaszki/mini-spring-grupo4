@@ -38,6 +38,9 @@ O sistema gerencia o cadastro e o controle de **Salas de Coworking**. A entidade
 O projeto não utiliza interface gráfica (Frontend) ou Swagger. Todos os testes de validação, sucesso e erro estão mapeados no ficheiro **`requests.http`** localizado na raiz do projeto. 
 Recomenda-se a utilização da extensão *REST Client* (VS Code) ou ferramentas como *Postman* / *Insomnia* para executar os testes interativos contra a rota `/salas`.
 
+## 🤖 Uso de Inteligência Artificial
+Este projeto contou com apoio de ferramentas de Inteligência Artificial durante o seu desenvolvimento.
+
 ## 🛣️ Rotas da API
 
 Todas as rotas respondem no caminho base `/salas`.
