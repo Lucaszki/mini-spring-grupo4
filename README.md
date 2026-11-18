@@ -1,55 +1,90 @@
-# Sistema de Gestão de Salas de Coworking
+# Sistema de Gestão de Salas de Coworking (Spring Boot)
 
-Projeto desenvolvido para a disciplina de Progrmação III, ministrada pelo professor **Alisson Ferreira da Silva**. O escopo foca na criação de uma API REST utilizando um framework educacional customizado ("Mini Spring") e rodando no Java 21.
+Projeto da disciplina de **Programação III**, ministrada pelo professor **Alisson Ferreira da Silva**.
+Esta é a **migração para Spring Boot** da API que o grupo havia desenvolvido com o framework educacional *Mini Spring*. O tema, as funcionalidades e as regras de negócio foram mantidos.
 
-## 👥 Integrantes - Grupo 4
+> **Versão anterior (Mini Spring):** preservada no próprio repositório, na tag `v1-mini-spring` (e/ou na branch `mini-spring`), para comparação.
+
+## Integrantes - Grupo 4
 * Gabriel Cavalcante
 * Hewerton Manoel
 * Lucas Guilherme
 * Marcos Vinicius
 * Silvano Antonio
 
-## 🏢 Descrição do Domínio
-O sistema gerencia o cadastro e o controle de **Salas de Coworking**. A entidade principal (`Sala`) armazena as seguintes informações:
-* `id`: Identificador único (UUID) gerado automaticamente.
-* `nome`: Nome da sala (obrigatório, não pode ser vazio ou conter apenas espaços).
-* `capacidadePessoas`: Capacidade máxima da sala (deve ser um valor numérico positivo).
+## Descrição do Domínio
+O sistema gerencia o cadastro e o controle de **Salas de Coworking**. A entidade principal (`Sala`) possui:
+* `id`: identificador único (UUID), gerado automaticamente pelo servidor.
+* `nome`: nome da sala (obrigatório, sem aceitar vazio ou apenas espaços).
+* `capacidadePessoas`: capacidade da sala (maior que zero e, por regra de negócio, no máximo 100).
 
-## ⚖️ Regras de Negócio Implementadas
-1. **Capacidade Máxima:** Nenhuma sala de coworking pode ser cadastrada ou atualizada com uma capacidade superior a **100 pessoas**. Caso esse limite seja excedido, a API rejeita a operação e retorna o status `422 Unprocessable Entity`.
-2. **Validação de Entrada:** Tentativas de cadastro com nome vazio ou capacidade zerada/negativa retornam `400 Bad Request`.
-3. **Persistência de ID:** O ID gerado na criação (`201 Created`) é preservado integralmente durante operações de atualização. Os dados são mantidos em memória durante a execução do servidor.
+## Regras de Negócio
+1. **Capacidade máxima:** nenhuma sala pode ser cadastrada ou atualizada com mais de **100 pessoas**. Violação retorna `422 Unprocessable Entity`.
+2. **Validação de entrada:** nome vazio/só espaços ou capacidade ausente, zero ou negativa retornam `400 Bad Request`. As mesmas validações valem no cadastro e na atualização.
+3. **ID automático e preservado:** o ID é gerado no cadastro e mantido nas atualizações. O cliente não pode enviá-lo.
+4. **Operação rejeitada não altera dados:** a validação ocorre antes de qualquer modificação.
+5. **Armazenamento em memória:** os dados são perdidos ao reiniciar a aplicação.
 
-## 🚀 Instruções de Execução
+## Como Executar
 
-### Pré-requisitos
-* Java 21 instalado (JDK 21).
-* Maven instalado.
-* IDE (IntelliJ IDEA, VS Code ou Eclipse).
+**Pré-requisitos:** JDK 21 e Maven.
 
-### Como rodar
-1. Clone o repositório para a sua máquina local.
-2. Abra a pasta do projeto na sua IDE de preferência.
-3. Navegue até o ficheiro principal: `src/main/java/br/com/minispring/exemplo/Application.java`.
-4. Execute o método `main()` da classe `Application`.
-5. O servidor será iniciado e estará a escutar na porta `8080` (`http://localhost:8080`).
+```bash
+# Rodar a aplicação (http://localhost:8080)
+mvn spring-boot:run
 
-### Como testar
-O projeto não utiliza interface gráfica (Frontend) ou Swagger. Todos os testes de validação, sucesso e erro estão mapeados no ficheiro **`requests.http`** localizado na raiz do projeto. 
-Recomenda-se a utilização da extensão *REST Client* (VS Code) ou ferramentas como *Postman* / *Insomnia* para executar os testes interativos contra a rota `/salas`.
+# Rodar os testes
+mvn test
 
-## 🤖 Uso de Inteligência Artificial
-Este projeto contou com apoio de ferramentas de Inteligência Artificial durante o seu desenvolvimento.
+# Gerar o JAR e executar
+mvn clean package
+java -jar target/salas-spring-boot-1.0.0.jar
+```
 
-## 🛣️ Rotas da API
+Pela IDE (Eclipse/IntelliJ): execute o método `main` da classe `br.com.coworking.SalasApplication`.
 
-Todas as rotas respondem no caminho base `/salas`.
+Para testar a API, use o arquivo **`requests.http`** (extensão *REST Client* do VS Code) ou o Postman/Insomnia.
 
-| Método | Rota | Descrição | Status de Sucesso |
+## Rotas da API
+
+| Método | Rota | Descrição | Sucesso |
 | :--- | :--- | :--- | :--- |
-| **POST** | `/salas` | Cadastra uma nova sala de coworking. | `201 Created` |
-| **GET** | `/salas` | Lista todas as salas cadastradas. | `200 OK` |
-| **GET** | `/salas?nome={termo}` | Filtra as salas por parte do nome (Ignorando Maiúsculas/Minúsculas). | `200 OK` |
-| **GET** | `/salas/{id}` | Busca uma sala específica através do seu ID. | `200 OK` |
-| **PUT** | `/salas/{id}` | Atualiza os dados de uma sala existente. | `200 OK` |
-| **DELETE** | `/salas/{id}` | Remove uma sala do sistema. | `204 No Content` |
+| POST | `/salas` | Cadastra uma sala | `201 Created` + header `Location` |
+| GET | `/salas` | Lista todas as salas | `200 OK` |
+| GET | `/salas?nome={termo}` | Filtra por parte do nome (ignora maiúsculas/minúsculas) | `200 OK` |
+| GET | `/salas/{id}` | Busca uma sala pelo ID | `200 OK` |
+| PUT | `/salas/{id}` | Atualiza uma sala | `200 OK` |
+| DELETE | `/salas/{id}` | Remove uma sala | `204 No Content` |
+
+Erros: `400` entrada inválida · `404` sala inexistente · `422` regra de negócio violada. As respostas de erro seguem o formato `ProblemDetail` (JSON do Spring).
+
+## Estrutura do Projeto
+
+```
+src/main/java/br/com/coworking
+├── SalasApplication.java      ponto de entrada (Spring Boot)
+├── controller/                camada HTTP
+├── service/                   regras de negócio
+├── repository/                interface + implementação em memória
+├── model/                     entidade Sala
+├── dto/                       SalaInput (DTO de entrada)
+└── exception/                 exceções de negócio e tratamento global de erros
+```
+
+## Principais Mudanças em Relação ao Mini Spring
+
+| Responsabilidade | Mini Spring | Spring Boot |
+| :--- | :--- | :--- |
+| Inicialização e servidor | `MiniApplication` + Jetty configurado à mão | `@SpringBootApplication` + Tomcat embutido (auto-configuração) |
+| Criação e injeção de objetos | `ComponentScanner` + `ApplicationContext` próprios | Container IoC do Spring (injeção por construtor mantida) |
+| Rotas | `@Route(method, path)` + `Router` | `@RequestMapping`, `@GetMapping`, `@PostMapping`... |
+| Dados da requisição | Anotações e *binding* próprios | `@PathVariable`, `@RequestParam`, `@RequestBody` do Spring MVC |
+| Validação | `Validator` e anotações próprias | Bean Validation (`@Valid`, `@NotBlank`, `@NotNull`, `@Positive`) |
+| Respostas e erros | `HttpResult` e `HttpException` | `ResponseEntity` e `@RestControllerAdvice` |
+| Configuração e build | `AppConfig` + plugin shade | `application.properties` + `spring-boot-maven-plugin` |
+| Testes | Jetty real em porta livre | `@SpringBootTest` + `MockMvc` e teste unitário sem Spring |
+
+O repository passou a ser sincronizado (`synchronized`) para ser seguro com várias requisições simultâneas.
+
+## Uso de Inteligência Artificial
+Foi utilizada a ferramenta de IA **Claude (Anthropic)** como apoio na migração do projeto, na escrita dos testes e da documentação. O código foi revisado pelo grupo, e todos os integrantes devem ser capazes de explicá-lo.

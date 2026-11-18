@@ -1,7 +1,13 @@
-### Variáveis
+### =====================================================
+### API de Salas de Coworking (Spring Boot) - Grupo 4
+### Use a extensao REST Client (VS Code) ou copie para o Postman.
+### =====================================================
+
 @baseUrl = http://localhost:8080
 
-### 1. Criar Sala (Sucesso - 201)
+### ---------- SUCESSO ----------
+
+### 1. Criar sala (201 + header Location)
 # @name criarSala
 POST {{baseUrl}}/salas
 Content-Type: application/json
@@ -11,11 +17,48 @@ Content-Type: application/json
   "capacidadePessoas": 25
 }
 
-###
+### Guarda o id retornado para usar nas proximas requisicoes
+@salaId = {{criarSala.response.body.$.id}}
 
-@salaId = {{criarSala.response.headers.Location}}
+### 2. Criar outra sala
+POST {{baseUrl}}/salas
+Content-Type: application/json
 
-### 2. Criar Sala (Erro 400 - Campos Inválidos)
+{
+  "nome": "Sala Azul",
+  "capacidadePessoas": 10
+}
+
+### 3. Criar sala no limite (100 e aceito)
+POST {{baseUrl}}/salas
+Content-Type: application/json
+
+{
+  "nome": "Auditorio Principal",
+  "capacidadePessoas": 100
+}
+
+### 4. Listar todas (200)
+GET {{baseUrl}}/salas
+
+### 5. Filtrar por nome, ignorando maiusculas/minusculas (200)
+GET {{baseUrl}}/salas?nome=MASTER
+
+### 6. Buscar por id (200)
+GET {{baseUrl}}/salas/{{salaId}}
+
+### 7. Atualizar (200) - o id e preservado
+PUT {{baseUrl}}/salas/{{salaId}}
+Content-Type: application/json
+
+{
+  "nome": "Sala Master Reformada",
+  "capacidadePessoas": 30
+}
+
+### ---------- ERRO 400 (entrada invalida) ----------
+
+### 8. Nome vazio e capacidade zero
 POST {{baseUrl}}/salas
 Content-Type: application/json
 
@@ -24,35 +67,98 @@ Content-Type: application/json
   "capacidadePessoas": 0
 }
 
-### 3. Criar Sala (Erro 422 - Regra de Negócio excedida)
+### 9. Nome so com espacos
 POST {{baseUrl}}/salas
 Content-Type: application/json
 
 {
-  "nome": "Auditório Principal",
-  "capacidadePessoas": 150
+  "nome": "   ",
+  "capacidadePessoas": 10
 }
 
-### 4. Listar todas as Salas (200)
-GET {{baseUrl}}/salas
-
-### 5. Filtrar Sala por Nome (200)
-GET {{baseUrl}}/salas?nome=master
-
-### 6. Buscar Sala por ID (200)
-GET {{baseUrl}}{{salaId}}
-
-### 7. Atualizar Sala (Sucesso - 200)
-PUT {{baseUrl}}{{salaId}}
+### 10. Capacidade negativa
+POST {{baseUrl}}/salas
 Content-Type: application/json
 
 {
-  "nome": "Sala Master Reformada",
-  "capacidadePessoas": 30
+  "nome": "Sala X",
+  "capacidadePessoas": -5
 }
 
-### 8. Excluir Sala (204)
-DELETE {{baseUrl}}{{salaId}}
+### 11. Campo desconhecido (o cliente nao pode enviar id)
+POST {{baseUrl}}/salas
+Content-Type: application/json
 
-### 9. Buscar Sala Inexistente (Erro 404)
-GET {{baseUrl}}/salas/id-invalido-123
+{
+  "id": "meu-id",
+  "nome": "Sala Y",
+  "capacidadePessoas": 10
+}
+
+### 12. Mesma validacao na atualizacao
+PUT {{baseUrl}}/salas/{{salaId}}
+Content-Type: application/json
+
+{
+  "nome": "",
+  "capacidadePessoas": 10
+}
+
+### ---------- ERRO 422 (regra de negocio) ----------
+
+### 13. Cadastro com capacidade acima de 100
+POST {{baseUrl}}/salas
+Content-Type: application/json
+
+{
+  "nome": "Sala Gigante",
+  "capacidadePessoas": 150
+}
+
+### 14. Atualizacao com capacidade acima de 100 (nao altera a sala)
+PUT {{baseUrl}}/salas/{{salaId}}
+Content-Type: application/json
+
+{
+  "nome": "Sala Hackeada",
+  "capacidadePessoas": 999
+}
+
+### 15. Conferir que a sala continua intacta (200)
+GET {{baseUrl}}/salas/{{salaId}}
+
+### ---------- ERRO 404 ----------
+
+### 16. Buscar id inexistente
+GET {{baseUrl}}/salas/id-que-nao-existe
+
+### 17. Atualizar id inexistente
+PUT {{baseUrl}}/salas/id-que-nao-existe
+Content-Type: application/json
+
+{
+  "nome": "Sala",
+  "capacidadePessoas": 5
+}
+
+### 18. Excluir id inexistente
+DELETE {{baseUrl}}/salas/id-que-nao-existe
+
+### ---------- EXTRAS ----------
+
+### 19. Metodo nao permitido (405)
+PATCH {{baseUrl}}/salas
+
+### 20. Tipo de conteudo nao suportado (415)
+POST {{baseUrl}}/salas
+Content-Type: text/plain
+
+oi
+
+### ---------- EXCLUIR ----------
+
+### 21. Excluir (204)
+DELETE {{baseUrl}}/salas/{{salaId}}
+
+### 22. Confirmar exclusao (404)
+GET {{baseUrl}}/salas/{{salaId}}
